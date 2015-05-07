@@ -1,0 +1,99 @@
+<?php
+
+class Lancamentos {
+
+	private $db;
+	private $erros = 0;
+	private $data;
+	private $data2;
+	private $codconta  = array();
+	private $historico = array();
+	private $vlrd      = array();
+	private $vlrc      = array();
+	private $tipo;
+	private $codtipo;
+	private $tipo_lancamento = 0;
+	private $tabela          = [
+		1 => ["_codlancamentosdespesas", "CodDe"],
+		2 => ["_codlancamentosrequisicoes", "CodRe"],
+		3 => ["_codlancamentospedidos", "CodPe"],
+		4 => ["_codlancamentosservicos", "CodSe"],
+		5 => ["_codlancamentosadiantamentos", "CodAd"],
+		6 => ["_codlancamentosboletos", "CodBo"],
+		7 => ["_codlancamentostransferencias", "CodTr"],
+		8 => ["_codlancamentospatrimonios", "CodPa"],
+		9 => ["_codlancamentossolicitacoesdepedido", "CodSP"],
+		10=> ["_codlancamentossolicitacoesderequisicao", "CodSR"],
+		11=> ["_codlancamentosestornopatrimonios", "CodEP"],
+		12=> ["_codlancamentosfolhasdepagamento", "CodFP"]
+	];
+
+	public function __construct($tipo) {
+		$this->db   = DB::getConection();
+		$this->tipo = $tipo;
+	}
+
+	public function setarCodTipo($codtipo) {
+		$this->codtipo = $codtipo;
+	}
+
+	public function setarLancamento($data, $codconta, $historico, $vlrd, $vlrc) {
+		$this->data        = strtotime($data);
+		$this->data2       = $data;
+		$this->codconta[]  = $this->buscarConta($codconta);
+		$this->historico[] = strtr($historico, ["'" => ""]);
+		$this->vlrd[]      = (float) $vlrd;
+		$this->vlrc[]      = (float) $vlrc;
+	}
+
+	private function executarLancamento($i) {
+		if ($this->vlrd[$i] > 0 || $this->vlrc[$i] > 0) {
+
+			if ($this->db->query("INSERT INTO lancamentos (DatLanc, DatLanc2, CodCont, Historico, VlrD, VlrC, Usuario, Tipo) VALUES ({$this->data}, '{$this->data2}', {$this->codconta[$i]}, '{$this->historico[$i]}', {$this->vlrd[$i]}, {$this->vlrc[$i]}, '{$_SESSION["usuario"]}', {$this->tipo_lancamento})") == false) {
+				++$this->erros;
+			}
+
+			$codlancamento = $this->db->lastInsertId('seq_lancamentos_id');
+
+			if ($this->db->query("INSERT INTO {$this->tabela[$this->tipo][0]} (CodLanc, {$this->tabela[$this->tipo][1]}) VALUES ({$codlancamento}, {$this->codtipo})") == false) {
+				++$this->erros;
+
+			}
+		}
+	}
+
+	private function buscarConta($codigo) {
+		$sth = $this->db->query("SELECT CodCon FROM contas WHERE CONCAT(A, '.', B, '.', C, '/', D, '-', E) = '{$codigo}'");
+		if ($sth == false || $sth->rowCount() == 0) {
+			++$this->erros;
+		}
+
+		$rv = $sth->fetch();
+		return $rv["codcon"];
+	}
+
+	public function setarTipoLancamento($tipo) {
+		$this->tipo_lancamento = $tipo;
+	}
+
+	public function retornarErros() {
+		return $this->erros;
+	}
+
+	public function __destruct() {
+
+		if (($this->erros == 0) && ((string) array_sum($this->vlrd) == (string) array_sum($this->vlrc))) {
+
+			for ($i = 0; $i < count($this->codconta); $i++) {
+				$this->executarLancamento($i);
+			}
+
+		} else {
+
+			++$this->erros;
+		}
+
+		foreach (get_class_vars(get_class($this)) as $chave => $valor) {unset($this->$chave);}
+	}
+
+}
