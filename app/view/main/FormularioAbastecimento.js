@@ -16,7 +16,7 @@ Ext.define('abastecimento.view.main.FormularioAbastecimento', {
 			xtype: 'form',
 			border: false,
 			bodyPadding: 10,
-			url: 'php/action/Abastecimento/salvarAbastecimento',
+			url: 'php/view/Abastecimento/salvarAbastecimento',
 			fieldDefaults:
 			{
 				labelAlign: 'top',
@@ -36,9 +36,15 @@ Ext.define('abastecimento.view.main.FormularioAbastecimento', {
 					items:
 					[
 						{
+							xtype: 'hiddenfield',
+							name: 'id'
+						},
+						{
 							xtype: 'datefield',
 							name: 'data',
 							fieldLabel: 'Data',
+							format: 'd/m/Y',
+							submitFormat: 'Y-m-d',
 							allowBlank: false
 						},
 						{
@@ -62,7 +68,7 @@ Ext.define('abastecimento.view.main.FormularioAbastecimento', {
 					title: 'Abastecimentos',
 					id: 'gridAbastecimentos',
 					store: 'abastecimento.store.AbastecimentoLocal',
-					height: 250,
+					height: 280,
 					border: true,
 					selType: 'rowmodel',
 					columns:
@@ -116,7 +122,8 @@ Ext.define('abastecimento.view.main.FormularioAbastecimento', {
 							text: 'Vlr Total',
 							dataIndex: 'valor_total',
 							flex: 1,
-							maxWidth: 100,
+							minWidth: 120,
+							maxWidth: 120,
 							editor: 
 							{
 								xtype: 'numberfield',
@@ -168,10 +175,24 @@ Ext.define('abastecimento.view.main.FormularioAbastecimento', {
 								}
 							}
 						},
+						{
+							xtype: 'tbseparator'
+						},
+						{
+							xtype: 'numberfield',
+							id: 'numberFieldDesconto',
+							name: 'desconto',
+							width: 110,
+							listeners: 
+							{
+								keyup: 'onKeyUpDesconto'
+							}
+						},
 						'->',
 						{
 							xtype: 'label',
-							id: 'labelTotal'
+							id: 'labelTotal',
+							width: 110
 						}
 					],
 					plugins:
@@ -215,7 +236,7 @@ Ext.define('abastecimento.view.main.FormularioAbastecimento', {
 
 							form.submit({
 								params: {
-									dataStore: stringDataStore
+									lista: stringDataStore
 								},
 								success: function(form, action){
 
@@ -229,8 +250,8 @@ Ext.define('abastecimento.view.main.FormularioAbastecimento', {
 										model: 'abastecimento.model.AbastecimentoLocal'
 									});
 
-									// var gridNFe = Ext.getCmp('tabNotasFiscais');
-									// gridNFe.getStore().reload();
+									var gridAbastecimentos = Ext.getCmp('tabAbastecimentos');
+									gridAbastecimentos.getStore().reload();
 
 								},
 								failure: function(form, action) {

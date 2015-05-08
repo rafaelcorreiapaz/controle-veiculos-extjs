@@ -25,6 +25,8 @@ Ext.define('abastecimento.view.main.Main', {
 				{
 					title: 'Abastecimentos',
 					xtype: 'gridpanel',
+					id: 'tabAbastecimentos',
+					store: 'abastecimento.store.Abastecimento',
 					dockedItems:
 					[
 						{
@@ -44,6 +46,14 @@ Ext.define('abastecimento.view.main.Main', {
 									iconCls: 'delete'
 								},
 								{
+									text: 'Emitir',
+									iconCls: 'report',
+									listeners:
+									{
+										click: 'onClickRelatorioAbastecimento'
+									}
+								},
+								{
 									text: 'Transmitir',
 									iconCls: 'transmit'
 								},
@@ -53,11 +63,12 @@ Ext.define('abastecimento.view.main.Main', {
 					columns:
 					[
 						{ text: 'Id', dataIndex: 'id' },
-						{ text: 'Data', dataIndex: 'data' },
-						{ text: 'Histórico', dataIndex: 'historico', flex: 1 },
+						{ text: 'Data', dataIndex: 'data', xtype:'datecolumn', format:'d/m/Y' },
+						// { text: 'Histórico', dataIndex: 'historico', flex: 1 },
 						{ text: 'Fornecedor', dataIndex: 'fornecedor', flex: 1 },
 						{ text: 'Total', dataIndex: 'total' },
-						{ text: 'Desconto', dataIndex: 'desconto' }
+						{ text: 'Desconto', dataIndex: 'desconto' },
+						{ text: 'Resultado', dataIndex: 'resultado' }
 					],
 
 				},

@@ -4,9 +4,10 @@ Ext.define('abastecimento.model.Abastecimento', {
 	[
 		{ name: 'id', type: 'int' },
 		{ name: 'data', type: 'date' },
-		{ name: 'historico', type: 'string' },
-		{ name: 'fornecedor', type: 'int' },
+		// { name: 'historico', type: 'string' },
+		{ name: 'fornecedor', type: 'string' },
 		{ name: 'total', type: 'float' },
 		{ name: 'desconto', type: 'float' },
+		{ name: 'resultado', type: 'float' },
 	]
 });
